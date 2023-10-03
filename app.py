@@ -3,16 +3,8 @@ import openai
 from flask import Flask, request, render_template, redirect, url_for
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = '/Users/davidallan/Documents/development/test'
-app.config['ALLOWED_EXTENSIONS'] = {'pdf'}
-uploaded_file_path = None  # Variable to store the path of the last uploaded file
 openai.api_key = os.getenv("OPENAI_API_KEY")
-
 messages = list()
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 def add_message(role, content):
     global messages
@@ -30,14 +22,7 @@ def index():
     upload_confirmation = None  # Variable to store the upload confirmation message
 
     if request.method == "POST":
-        if 'file' in request.files:
-            uploaded_file = request.files['file']
-            if uploaded_file.filename != '' and allowed_file(uploaded_file.filename):
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], uploaded_file.filename)
-                uploaded_file.save(file_path)
-                uploaded_file_path = file_path  # Update the global variable with the new file path
-                upload_confirmation = f"File '{uploaded_file.filename}' uploaded successfully!"
-        elif 'query' in request.form:
+        if 'query' in request.form:
             query = request.form['query']
             add_message("user", query)  # Keep this line
 
@@ -64,18 +49,3 @@ def index():
 
 
     return render_template("index.html", messages=messages, upload_confirmation=upload_confirmation)
-
-def create_prompt(query):
-    return "Try and respond:{}".format(query)
-
-def test():
-    completion = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": "Hello!"}
-        ]
-        )
-    print(completion.choices[0].message.get("content"))
-if __name__ == "__main__":
-    test()
