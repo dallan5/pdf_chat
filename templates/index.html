@@ -29,8 +29,8 @@
     <div class="main-container">
         <!-- PDF Container on the Left -->
         <div class="pdf-wrapper">
-            <object class="pdf-object" data="{{ url_for('static', filename='ShotGrid.pdf') }}" type="application/pdf">
-                <p>It seems your browser doesn't support viewing PDFs. You can <a href="{{ url_for('static', filename='ShotGrid.pdf') }}">download the PDF here</a> instead.</p>
+            <object class="pdf-object" data="{{ url_for('static', filename='pdf/test_book.pdf') }}" type="application/pdf">
+                <p>It seems your browser doesn't support viewing PDFs. You can <a href="{{ url_for('static', filename='pdf/test_book.pdf') }}">download the PDF here</a> instead.</p>
             </object>
         </div>
 
@@ -40,9 +40,7 @@
             <h3>Chat Window</h3>
             <div id="chat-window">
                 {% for message in messages %}
-                    {% if loop.index == 1 %}
-                        <div>Try typing something!</div>
-                    {% else %}
+                    {% if loop.index > 1 %}
                         <div class="{{ message.role }}">{{ message.content }}</div>
                     {% endif %}
                 {% endfor %}
