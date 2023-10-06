@@ -28,10 +28,8 @@
 <body>
     <div class="main-container">
         <!-- PDF Container on the Left -->
-        <div class="pdf-wrapper">
-            <object class="pdf-object" data="{{ url_for('static', filename='pdf/test_book.pdf') }}" type="application/pdf">
-                <p>It seems your browser doesn't support viewing PDFs. You can <a href="{{ url_for('static', filename='pdf/test_book.pdf') }}">download the PDF here</a> instead.</p>
-            </object>
+        <div id="pdf-wrapper" style="flex: 1; padding: 10px; height: 50vh;">
+            <!-- PDF.js Express Viewer will be injected here -->
         </div>
 
         <!-- Chat Container on the Right -->
@@ -96,6 +94,43 @@
             .catch(error => {
                 console.error("Error:", error);
             });
+        });
+    </script>
+
+    <script src="{{ url_for('static', filename='libs/PDFJSExpress/lib/webviewer.min.js') }}"></script>
+    
+    <script>
+        WebViewer({
+            path: "{{ url_for('static', filename='libs/PDFJSExpress/lib') }}",
+            initialDoc: "{{ url_for('static', filename='pdf/book.pdf') }}",
+            disabledElements: [
+                "header",
+                "annotation"
+            ],
+        }, document.getElementById('pdf-wrapper'))
+        .then(instance => {
+            // ... your code here ...
+            // see API here - https://pdfjs.express/documentation/samples/ui
+            // change to dark mode
+            instance.UI.setTheme('dark');
+
+            // disable printing
+            instance.UI.disableFeatures([instance.UI.Feature.Print])
+
+            // disable text selection
+            //instance.UI.disableFeatures([instance.UI.Feature.TextSelection])
+
+            // disable annotations
+            instance.UI.disableFeatures([instance.UI.Feature.Annotations])
+
+            const { documentViewer } = instance.Core;
+
+            documentViewer.addEventListener('textSelected', (quads, selectedText, pageNumber) => {
+                //const pageNumber = event.pageNumber;
+                //const quads = event.quads;
+                //const text = await documentViewer.getText(pageNumber, quads);
+                console.log(selectedText);
+            })
         });
     </script>
     <!-- End of JavaScript -->
