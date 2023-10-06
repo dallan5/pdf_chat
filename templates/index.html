@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -36,6 +35,11 @@
         <div class="chat-container">
             <img src="{{ url_for('static', filename='tutor.png') }}" class="icon" />
             <h3>Chat Window</h3>
+
+            <!-- Button to save text to memory -->
+            <button id="add-button">Add text to memory</button>
+            <button id="clear-button">Clear</button>
+
             <div id="chat-window">
                 {% for message in messages %}
                     {% if loop.index > 1 %}
@@ -53,6 +57,9 @@
 
     <!-- Start of JavaScript -->
     <script>
+        //Global variable for selected text
+        let latestSelectedText = "";
+
         document.querySelector("form").addEventListener("submit", function(event){
             event.preventDefault(); // Stop the form from submitting
 
@@ -95,6 +102,32 @@
                 console.error("Error:", error);
             });
         });
+
+        // Add a click event listener to the "Save text to memory" button
+        document.getElementById("add-button").addEventListener("click", function () {
+            // Get the selected text
+            
+            if (latestSelectedText) {
+                
+                // Send an AJAX request to Flask to handle the selected text
+                fetch('/add_text_to_memory', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: latestSelectedText }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Handle the response from the Flask server if needed
+                    console.log("Response from server:", data);
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+            }
+        });
+
     </script>
 
     <script src="{{ url_for('static', filename='libs/PDFJSExpress/lib/webviewer.min.js') }}"></script>
@@ -124,12 +157,15 @@
             instance.UI.disableFeatures([instance.UI.Feature.Annotations])
 
             const { documentViewer } = instance.Core;
-
+            
             documentViewer.addEventListener('textSelected', (quads, selectedText, pageNumber) => {
                 //const pageNumber = event.pageNumber;
                 //const quads = event.quads;
                 //const text = await documentViewer.getText(pageNumber, quads);
-                console.log(selectedText);
+                if (selectedText) {
+                    latestSelectedText = selectedText
+                }
+                //console.log(selected_text);
             })
         });
     </script>

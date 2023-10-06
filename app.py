@@ -5,6 +5,7 @@ from flask import Flask, request, render_template, jsonify
 app = Flask(__name__)
 openai.api_key = os.getenv("OPENAI_API_KEY")
 messages = list()
+text = ""
 
 def add_message(role, content):
     global messages
@@ -78,3 +79,14 @@ def index():
 
 
     return render_template("index.html", messages=messages)
+
+@app.route("/add_text_to_memory", methods=["POST"])
+def add_text_to_memory():
+    global text
+    if request.method == "POST":
+        data = request.json
+        if data.get("text", "") not in text:
+            text += data.get("text", "")
+        return jsonify({"message": "Text saved to memory."})
+    return jsonify({"message": "Invalid request."})
+
