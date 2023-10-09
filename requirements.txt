@@ -26,3 +26,5 @@ Werkzeug==2.0.2
 tiktoken==0.5.1
 Flask-Markdown==0.3
 markdown2==2.4.10
+pypdf2==3.0.1
+typing_extensions==4.8.0

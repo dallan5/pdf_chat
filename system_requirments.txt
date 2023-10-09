@@ -1,29 +1,44 @@
 PDF CHAT
 
-FR - Functional requirements
+FR - Funcational requirements
 NFR - Non-functional requirements
 
 Must have:
-    - Upload PDF functionality with error handling for unsupported formats (FR)
-    - Interactive chat window (FR)
-    - Integrated PDF viewer (FR)
-    - Live website hosting (FR)
-    - Response time for all interactions below 2 seconds (NFR)
-
+	- Upload PDF (FR)
+	- Chat window (FR),
+	- PDF viewer (FR)
+	- Functioning website host (FR)
+    - Must be relatively fast (NFR)
 Should have:
-    - Text presentation should be:
-        - Adjusted bubble sizes
-        - Properly aligned text
-        - Readable font
-        - Dark mode option (NFR)
+	- Nice text formatting (NFR) 
+		- Choose a more readable font
+		- Make the website dark mode
+Could have
+	- Some form of auto detect text from current page.(FR)
+	- functionality to mark sections of the text as difficult (FR)
+	- Propose example queries (FR)
+	- Run pdf functionality via chat (FR)
+	- Run functionality that enables the chatbot to always remember certain parts of the text. 
+Won’t have this time
+	- Animated text
+	- Ask questions about the whole text
 
-Could have:
-    - Auto-detection of text from the currently viewed PDF page (FR)
-    - User ability to mark sections of text as challenging (FR)
-    - Suggested chatbot queries based on viewed content (FR)
-    - PDF functionalities accessible via chat (FR)
-    - Persistent memory functionality for the chatbot to recall specific text sections (FR)
 
-Won’t have this time:
-    - Text animations (NFR)
-    - Chatbot capability to question the entirety of the uploaded text (FR)
+
+First iteration:
+    Feedback:
+        Stopped using it after a while because it got annoying having to select parts of the text and "save to memory".
+        Also, the formatting is really tiring for the eyes and it gets really hard to read the text compated to the pdf. 
+
+        Also, seems like there are some bug that doesn't clear the memory properly. 
+        I think the clear memory should be a complete "reset" of the chatbot instead of clearing memory.
+        It's to arbitrary
+
+    Utopia:
+        After PDF is open, I have a set of pre-existing questions that I can choose from.
+        the chatbot unietively understands the context from my current page. 
+        Theese questions could be:
+            - What is this text about?
+            - Write me some questions about this text?
+            - Could you exaplain more simply?
+
