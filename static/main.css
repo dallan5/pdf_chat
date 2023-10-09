@@ -15,6 +15,16 @@
   font-style: normal;
 }
 
+/* Default (light mode) variables */
+:root {
+    --text-color: #353740;
+    --background-color: #fff;
+    --secondary-bg-color: #e9e9e9;
+    --primary-color: #10a37f;
+    --border-color: #ccc;
+    --inverse-text-color: #fff;
+}
+
 body, html {
   margin: 0;
   padding: 0;
@@ -22,8 +32,9 @@ body, html {
   overflow: hidden;
   font-size: 16px;
   line-height: 24px;
-  color: #353740;
+  color: var(--text-color);
   font-family: "ColfaxAI", Helvetica, sans-serif;
+  background-color: var(--background-color);
 }
 
 .main-container {
@@ -36,14 +47,14 @@ body, html {
   padding: 10px;
   box-sizing: border-box;
   overflow: hidden;
-  display: flex;  /* make this a flex container to control child element's height */
+  display: flex;
   flex-direction: column;
 }
 
 .pdf-object {
   width: 100%;
-  flex: 1;  /* make sure it occupies the full height available to it */
-  overflow: auto;  /* in case the PDF has more pages than can be displayed */
+  flex: 1;
+  overflow: auto;
 }
 
 .icon {
@@ -55,7 +66,7 @@ h3 {
   font-size: 32px;
   line-height: 40px;
   font-weight: bold;
-  color: #202123;
+  color: var(--text-color);
   margin: 16px 0;
 }
 
@@ -67,7 +78,7 @@ form {
 
 input[type="text"], input[type="submit"] {
   padding: 12px 16px;
-  border: 1px solid #10a37f;
+  border: 1px solid var(--primary-color);
   border-radius: 4px;
   margin-bottom: 10px;
 }
@@ -78,34 +89,50 @@ input[type="text"], input[type="submit"] {
 
 input[type="submit"] {
   padding: 12px 0;
-  color: #fff;
-  background-color: #10a37f;
+  color: var(--inverse-text-color);
+  background-color: var(--primary-color);
   border: none;
   border-radius: 4px;
   cursor: pointer;
 }
 
+/* ... (rest of your CSS code) ... */
+
 #chat-window {
-  flex-grow: 1;  /* allows chat window to grow and take available space */
-  border: 1px solid #ccc;
+  flex-grow: 1;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   padding: 10px;
   overflow-y: auto;
-  margin-bottom: 10px;  /* slight margin for separation from the form */
+  margin-bottom: 10px;
+  background-color: var(--background-color);  /* Set the chat window background to the default background color */
 }
 
 #chat-window .user, #chat-window .assistant {
   margin-bottom: 10px;
   padding: 10px;
-  border-radius: 4px;
+  border-radius: 0;  /* Removed rounded corners for blocks */
 }
 
 #chat-window .user {
-  background-color: #e9e9e9;
-  text-align: right;
+  background-color: var(--background-color);  /* Set the user background to the default background color, making it blend */
+  text-align: left;  /* Set the user text alignment to left */
+  color: var(--text-color);  /* Use the default text color for user messages */
 }
 
 #chat-window .assistant {
-  background-color: #10a37f;
-  color: #fff;
+  background-color: var(--secondary-bg-color);  /* Set the assistant background to the secondary (lighter) gray */
+  color: var(--text-color);  /* Dark text on light background for assistant messages */
 }
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --text-color: #ffffff;
+        --background-color: #444;
+        --secondary-bg-color: #333;
+        --border-color: #555;
+        --inverse-text-color: #000;
+    }
+}
+
