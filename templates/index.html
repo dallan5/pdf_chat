@@ -25,6 +25,8 @@
 </head>
 
 <body>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <div class="main-container">
         <!-- PDF Container on the Left -->
         <div id="pdf-wrapper" style="flex: 1; padding: 10px; height: 100vh;">
@@ -43,10 +45,12 @@
             <div id="chat-window">
                 {% for message in messages %}
                     {% if loop.index > 1 %}
-                        <div class="{{ message.role }}">{{ message.content }}</div>
+                        <div class="{{ message.role }} markdown">{{ message.content|safe }}</div>
                     {% endif %}
                 {% endfor %}
-            </div>
+            </div>            
+            
+            
 
             <form action="/" method="post">
                 <input type="text" name="query" placeholder="Type your message..." required />
@@ -92,7 +96,7 @@
                 // Update chat window with OpenAI's response.
                 const aiMessage = document.createElement("div");
                 aiMessage.className = data.role || "assistant";
-                aiMessage.textContent = data.message;
+                aiMessage.innerHTML = data.message;
                 chatWindow.appendChild(aiMessage);
 
                 // Scroll to the bottom of the chat window
@@ -128,8 +132,21 @@
             }
         });
 
-    </script>
+        document.getElementById("clear-button").addEventListener("click", function () {
+            // Send an AJAX request to Flask to clear the memory
+            fetch('/clear_memory', {
+                method: 'POST',
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Response from server:", data.message);
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        });
 
+    </script>
     <script src="{{ url_for('static', filename='libs/PDFJSExpress/lib/webviewer.min.js') }}"></script>
     
     <script>

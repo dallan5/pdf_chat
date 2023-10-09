@@ -1,0 +1,18 @@
+"Exercise offers numerous **health benefits**:
+
+- **Improved cardiovascular health**: Engaging in aerobic activities strengthens the heart.
+- **Increased muscle strength**: Lifting weights or bodyweight exercises can enhance muscle tone.
+- *Flexibility*: Practices like yoga and pilates improve joint and muscle flexibility.
+- **Enhanced mood**: Physical activity releases endorphins which can help in elevating mood and reducing stress.
+- Better sleep: Regular exercise can improve sleep patterns and quality.
+
+For those new to exercise, a simple starter workout might look like this:
+
+```python
+def starter_workout():
+    print("Warm up for 5 minutes")
+    print("10 push-ups")
+    print("10 squats")
+    print("10 jumping jacks")
+    print("Repeat 3 times")
+    print("Cool down for 5 minutes")
