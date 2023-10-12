@@ -1,6 +1,6 @@
 import openai
 from flask import request, render_template, jsonify, views
-from .utils import markdown_to_html, format_message
+from .utils import markdown_to_html, format_message, extract_text_from_page
 from .state import get_state_manager
 
 state_manager = get_state_manager()
@@ -86,24 +86,25 @@ class ChatView(views.MethodView):
 class MemoryView(views.MethodView):
 
     def post(self):
-        if request.path.endswith('add_text_to_memory'):
-            return self.add_text_to_memory()
-        elif request.path.endswith('clear_memory'):
+        if request.path.endswith('clear_memory'):
             return self.clear_memory()
+        elif request.path.endswith('capture_text'):
+            return self.capture_text()
+        
+    
+    def capture_text(self):
+        try:
+            data = request.json
+            page_number = data.get("page_number", 0)
+            text = extract_text_from_page(state_manager.pdf_path, page_number)
+            state_manager.source_text = text
+            update_state_manager_messages(state_manager)
+            return jsonify({"message": "Updated source text to page {}".format(int(page_number))})
+        except Exception as e:
+            print(f"Capture Text Error: {e}")
+            return jsonify({"error": str(e)}), 500
 
-    def add_text_to_memory(self):
-        data = request.json
-        text = data.get("text", "")
-        state_manager.source_text = text
-        update_state_manager_messages(state_manager)
-        return jsonify({"message": "Text saved to memory."})
-
-    def clear_memory(self):
-        state_manager.source_text = ""
-        update_state_manager_messages(state_manager)
-        return jsonify({"message": "Memory cleared"})
 
 def initialize_routes(app):
     app.add_url_rule('/', view_func=ChatView.as_view('index'))
-    app.add_url_rule('/add_text_to_memory', view_func=MemoryView.as_view('add_text_to_memory'))
-    app.add_url_rule('/clear_memory', view_func=MemoryView.as_view('clear_memory'))
+    app.add_url_rule('/capture_text', view_func = MemoryView.as_view("capture_text"))

@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat with Assistant</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}" />
     <style>
-        /* New styles added */
         .main-container {
             display: flex;
         }
@@ -19,7 +19,7 @@
 
         .pdf-object {
             width: 100%;
-            height: 400px; /* Adjust height as needed */
+            height: 400px;
         }
     </style>
 </head>
@@ -29,28 +29,20 @@
 
     <div class="main-container">
         <!-- PDF Container on the Left -->
-        <div id="pdf-wrapper" style="flex: 1; padding: 10px; height: 100vh;">
-            <!-- PDF.js Express Viewer will be injected here -->
-        </div>
+        <div id="pdf-wrapper" style="flex: 1; padding: 10px; height: 100vh;"></div>
 
         <!-- Chat Container on the Right -->
         <div class="chat-container">
             <img src="{{ url_for('static', filename='tutor.png') }}" class="icon" />
             <h3>Chat Window</h3>
 
-            <!-- Button to save text to memory -->
-            <button id="add-button">Add text to memory</button>
-            <button id="clear-button">Clear</button>
-
             <div id="chat-window">
                 {% for message in messages %}
-                    {% if loop.index > 1 %}
-                        <div class="{{ message.role }} markdown">{{ message.content|safe }}</div>
-                    {% endif %}
+                {% if loop.index > 1 %}
+                <div class="{{ message.role }} markdown">{{ message.content|safe }}</div>
+                {% endif %}
                 {% endfor %}
-            </div>            
-            
-            
+            </div>
 
             <form action="/" method="post">
                 <input type="text" name="query" placeholder="Type your message..." required />
@@ -61,29 +53,23 @@
 
     <!-- Start of JavaScript -->
     <script>
-        //Global variable for selected text
         let latestSelectedText = "";
 
-        document.querySelector("form").addEventListener("submit", function(event){
-            event.preventDefault(); // Stop the form from submitting
+        document.querySelector("form").addEventListener("submit", function (event) {
+            event.preventDefault();
 
-            // Collect data from the form
             const formData = new FormData(event.target);
-
-            // Convert formData to JSON
             const formObject = {};
             formData.forEach((value, key) => {
                 formObject[key] = value;
             });
 
-            // Update chat window with user's message.
             const chatWindow = document.getElementById("chat-window");
             const userMessage = document.createElement("div");
             userMessage.className = "user";
             userMessage.textContent = formObject.query;
             chatWindow.appendChild(userMessage);
 
-            // Send form data using fetch
             fetch("/", {
                 method: "POST",
                 headers: {
@@ -91,102 +77,61 @@
                 },
                 body: JSON.stringify(formObject)
             })
-            .then(response => response.json())
-            .then(data => {
-                // Update chat window with OpenAI's response.
-                const aiMessage = document.createElement("div");
-                aiMessage.className = data.role || "assistant";
-                aiMessage.innerHTML = data.message;
-                chatWindow.appendChild(aiMessage);
-
-                // Scroll to the bottom of the chat window
-                chatWindow.scrollTop = chatWindow.scrollHeight;
-            })
-            .catch(error => {
-                console.error("Error:", error);
-            });
-        });
-
-        // Add a click event listener to the "Save text to memory" button
-        document.getElementById("add-button").addEventListener("click", function () {
-            // Get the selected text
-            
-            if (latestSelectedText) {
-                
-                // Send an AJAX request to Flask to handle the selected text
-                fetch('/add_text_to_memory', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ text: latestSelectedText }),
-                })
                 .then(response => response.json())
                 .then(data => {
-                    // Handle the response from the Flask server if needed
-                    console.log("Response from server:", data);
+                    const aiMessage = document.createElement("div");
+                    aiMessage.className = data.role || "assistant";
+                    aiMessage.innerHTML = data.message;
+                    chatWindow.appendChild(aiMessage);
+                    chatWindow.scrollTop = chatWindow.scrollHeight;
                 })
                 .catch(error => {
                     console.error("Error:", error);
                 });
-            }
-        });
-
-        document.getElementById("clear-button").addEventListener("click", function () {
-            // Send an AJAX request to Flask to clear the memory
-            fetch('/clear_memory', {
-                method: 'POST',
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log("Response from server:", data.message);
-            })
-            .catch(error => {
-                console.error("Error:", error);
-            });
         });
 
     </script>
+
     <script src="{{ url_for('static', filename='libs/PDFJSExpress/lib/webviewer.min.js') }}"></script>
-    
+
     <script>
         WebViewer({
             path: "{{ url_for('static', filename='libs/PDFJSExpress/lib') }}",
             initialDoc: "{{ url_for('static', filename='pdf/book.pdf') }}",
-            disabledElements: [
-                "header",
-                "annotation"
-            ],
+            disabledElements: ["header", "annotation"],
         }, document.getElementById('pdf-wrapper'))
-        .then(instance => {
-            // ... your code here ...
-            // see API here - https://pdfjs.express/documentation/samples/ui
-            // change to dark mode
-            instance.UI.setTheme('dark');
+            .then(instance => {
+                instance.UI.setTheme('dark');
+                instance.UI.disableFeatures([instance.UI.Feature.Print, instance.UI.Feature.Annotations]);
 
-            // disable printing
-            instance.UI.disableFeatures([instance.UI.Feature.Print])
+                const {
+                    documentViewer
+                } = instance.Core;
 
-            // disable text selection
-            //instance.UI.disableFeatures([instance.UI.Feature.TextSelection])
+                documentViewer.addEventListener('pageNumberUpdated', (pageNumber) => {
+                    console.log(`Switched to page: ${pageNumber}`);
 
-            // disable annotations
-            instance.UI.disableFeatures([instance.UI.Feature.Annotations])
+                    fetch('/capture_text', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            page_number: pageNumber,
+                        }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
 
-            const { documentViewer } = instance.Core;
-            
-            documentViewer.addEventListener('textSelected', (quads, selectedText, pageNumber) => {
-                //const pageNumber = event.pageNumber;
-                //const quads = event.quads;
-                //const text = await documentViewer.getText(pageNumber, quads);
-                if (selectedText) {
-                    latestSelectedText = selectedText
-                }
-                //console.log(selected_text);
-            })
-        });
+                });
+            });
+
     </script>
-    <!-- End of JavaScript -->
 
 </body>
 

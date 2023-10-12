@@ -7,9 +7,18 @@ class StateManager:
         return cls._instance
 
     def __init__(self):
+        self._pdf_path = ""
         self._source_text = ""
         self._conversation_messages = list()
         self._system_messages = list()
+
+    @property
+    def pdf_path(self):
+        return self._pdf_path
+    
+    @pdf_path.setter
+    def pdf_path(self, path):
+        self._pdf_path = path
 
     @property
     def source_text(self):

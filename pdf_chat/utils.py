@@ -1,5 +1,6 @@
 from pdf_chat.config import Config
 import markdown
+import PyPDF2
 
 def format_message(role, content):
     return {
@@ -27,3 +28,16 @@ def add_message_to_list(role, content, messages=None):
     _message = format_message(role, content)
     messages.append(_message)
     return messages
+
+def extract_text_from_page(pdf_path, page_number):
+    with open(pdf_path, 'rb') as file:
+        reader = PyPDF2.PdfReader(file)
+        
+        if reader.is_encrypted:
+            reader.decrypt('')
+        
+        if page_number < len(reader.pages):
+            page = reader.pages[page_number]
+            return page.extract_text()
+        else:
+            return f"Page {page_number} not found in the document."
