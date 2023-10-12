@@ -10,7 +10,7 @@ from pdf_chat.utils import setup_messages, add_message_to_list
 def update_state_manager_messages(state_manager):
     messages = setup_messages()
     if state_manager.source_text:
-        messages = add_message_to_list("user", state_manager.source_text, messages)
+        messages = add_message_to_list("user", "Process the following text on page {} and base all subsequent responses on the facts contained within:\n{}".format(state_manager.source_page, state_manager.source_text), messages)
     messages += state_manager.conversation_messages
     state_manager.system_messages = messages
 
@@ -96,10 +96,12 @@ class MemoryView(views.MethodView):
         try:
             data = request.json
             page_number = data.get("page_number", 0)
+            print(page_number)
             text = extract_text_from_page(state_manager.pdf_path, page_number)
+            state_manager.source_page = page_number
             state_manager.source_text = text
             update_state_manager_messages(state_manager)
-            return jsonify({"message": "Updated source text to page {}".format(int(page_number))})
+            return jsonify({"message": "{}".format(str(text))})
         except Exception as e:
             print(f"Capture Text Error: {e}")
             return jsonify({"error": str(e)}), 500

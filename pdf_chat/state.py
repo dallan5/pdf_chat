@@ -1,3 +1,5 @@
+from pdf_chat.config import Config
+
 class StateManager:
     _instance = None
 
@@ -9,6 +11,7 @@ class StateManager:
     def __init__(self):
         self._pdf_path = ""
         self._source_text = ""
+        self._source_page = 0
         self._conversation_messages = list()
         self._system_messages = list()
 
@@ -23,6 +26,7 @@ class StateManager:
     @property
     def source_text(self):
         return self._source_text
+    
 
     @source_text.setter
     def source_text(self, text):
@@ -30,6 +34,15 @@ class StateManager:
         print("source_text SET")
         print(self._source_text)
         print('---------------------')
+
+    @property
+    def source_page(self):
+        return self._source_page
+
+    @source_page.setter
+    def source_page(self, page):
+        self._source_page = page
+
 
     @property
     def system_messages(self):

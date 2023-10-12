@@ -30,6 +30,7 @@ def add_message_to_list(role, content, messages=None):
     return messages
 
 def extract_text_from_page(pdf_path, page_number):
+    print("PAGE NUMBER", page_number)
     with open(pdf_path, 'rb') as file:
         reader = PyPDF2.PdfReader(file)
         
@@ -37,7 +38,7 @@ def extract_text_from_page(pdf_path, page_number):
             reader.decrypt('')
         
         if page_number < len(reader.pages):
-            page = reader.pages[page_number]
+            page = reader.pages[page_number-1]
             return page.extract_text()
         else:
             return f"Page {page_number} not found in the document."
