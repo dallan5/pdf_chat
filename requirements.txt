@@ -28,3 +28,4 @@ Flask-Markdown==0.3
 markdown2==2.4.10
 pypdf2==3.0.1
 typing_extensions==4.8.0
+gunicorn==21.2.0
