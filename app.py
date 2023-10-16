@@ -1,8 +1,12 @@
 import os
 import logging
+from dotenv import load_dotenv
 import openai
 
 from flask import Flask
+
+# Load environment variables from .env file
+load_dotenv()
 
 from pdf_chat.config import Config
 from pdf_chat.routes import initialize_routes
