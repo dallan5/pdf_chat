@@ -70,6 +70,9 @@
             userMessage.textContent = formObject.query;
             chatWindow.appendChild(userMessage);
 
+            // Clear the input field
+            event.target.query.value = '';  // This line clears the input field
+
             fetch("/", {
                 method: "POST",
                 headers: {
