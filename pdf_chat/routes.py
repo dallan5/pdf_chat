@@ -1,6 +1,6 @@
 import openai
 from flask import request, render_template, jsonify, views
-from .utils import markdown_to_html, format_message, extract_text_from_page
+from .utils import markdown_to_html, format_message, extract_text_from_page, clear_messages
 from .state import get_state_manager
 
 state_manager = get_state_manager()
@@ -33,30 +33,58 @@ class ChatView(views.MethodView):
     def _handle_ajax_request(self):
         query = request.json['query']
         register_message("user", query)  # Keep this line
+        # Flag to control the while loop
+        retry_request = True
+        # Counter to keep track of the number of attempts
+        attempt_counter = 0
+        # Maximum number of attempts
+        max_attempts = 20
 
-        try:
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=state_manager.system_messages,
-                temperature=0,
-                max_tokens=1024,
-                top_p=1,
-                frequency_penalty=0,
-                presence_penalty=0
-            )
-            # Fetch the role and content of the response message
-            role = response['choices'][0]['message']['role']
-            content = markdown_to_html(response['choices'][0]['message']['content'])
-            register_message(role, content)
+        while retry_request and attempt_counter < max_attempts:
+            attempt_counter += 1  # Increment the counter at the beginning of each loop iteration
+            try:
+                # Your OpenAI API request
+                response = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=state_manager.system_messages,
+                    temperature=0,
+                    max_tokens=1024,
+                    top_p=1,
+                    frequency_penalty=0,
+                    presence_penalty=0
+                )
 
-            # Return the response to the frontend
-            return jsonify({"role": role, "message": content})
+                # If the request is successful, the following lines will execute,
+                # and the loop will exit by setting retry_request to False
+                role = response['choices'][0]['message']['role']
+                content = markdown_to_html(response['choices'][0]['message']['content'])
+                register_message(role, content)
+                retry_request = False  # Set the flag to false to exit the loop
 
-        except Exception as e:
-            print(f"Error: {e}")
-            content = "Sorry, I couldn't process that request."
+            except openai.error.RateLimitError as e:
+                print(f"OpenAI API request exceeded rate limit: {e}")
+                # Optionally, you may want to break out of the loop or handle this error differently
+
+            except openai.error.OpenAIError as e:
+                # Assuming the token error is of type OpenAIError, adjust if necessary
+                print(f"Token error: {e}. Clearing messages and retrying...")
+                state_manager.system_messages = clear_messages(state_manager.system_messages)
+
+            except Exception as e:
+                print(f"Error: {e}")
+                content = "Sorry, I couldn't process that request."
+                register_message("assistant", content)
+                retry_request = False  # Set the flag to false to exit the loop
+
+        # Check if the loop exited due to reaching the maximum number of attempts
+        if attempt_counter >= max_attempts:
+            content = "Sorry, I couldn't process that request after multiple attempts."
             register_message("assistant", content)
-            return jsonify({"role": "assistant", "message": content})
+
+        # Return the response to the frontend
+        # This is placed outside the loop to ensure it's executed once the loop exits
+        return jsonify({"role": role, "message": content})
+
 
     def _handle_form_request(self):
         query = request.form['query']

@@ -42,3 +42,11 @@ def extract_text_from_page(pdf_path, page_number):
             return page.extract_text()
         else:
             return f"Page {page_number} not found in the document."
+
+def clear_messages(messages):
+    # Remove single message
+    if not messages:
+        return []
+
+    #Always remove the index 2, since 0 and 1 are assistant instructions followed by text. Keep the rest
+    return [item for i, item in enumerate(messages) if i != 2]

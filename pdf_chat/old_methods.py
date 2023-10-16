@@ -24,3 +24,14 @@ def recursive_clear_messages(messages):
         return recursive_clear_messages(messages)
     else:
         return messages
+    
+
+def clear_messages(messages):
+    # Remove messages intil tokens are less than 4990
+    if not messages:
+        return []
+
+    #Always remove the index 2, since 0 and 1 are assistant instructions followed by text. Keep the rest
+    return [item for i, item in enumerate(messages) if i != 2] 
+
+
