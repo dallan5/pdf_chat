@@ -1,10 +1,11 @@
+import os
 import openai
-import json
-from flask import request, render_template, jsonify, views, session
-from .utils import markdown_to_html, format_message, extract_text_from_page, clear_messages
-from .session import get_session_data, set_session_data, update_session_messages
+from flask import request, render_template, jsonify, views, session, url_for, send_from_directory
+from werkzeug.utils import secure_filename
 
-from pdf_chat.utils import setup_messages, add_message_to_list
+from .utils import markdown_to_html, format_message, extract_text_from_page, clear_messages, setup_messages, clear_directory
+from .session import get_session_data, set_session_data, update_session_messages
+from .config import Config
 
 def register_message(role, content):
     
@@ -12,6 +13,7 @@ def register_message(role, content):
     conversation_messages.append(format_message(role, content))
     set_session_data("conversation_messages", conversation_messages)
     update_session_messages()
+
 
 class ChatView(views.MethodView):
     
@@ -98,32 +100,61 @@ class ChatView(views.MethodView):
 class MemoryView(views.MethodView):
 
     def post(self):
+        print(request.path)
         if request.path.endswith('clear_session'):
             return self.clear_session()
         elif request.path.endswith('capture_text'):
             return self.capture_text()
-    
+        elif request.path.endswith('upload_file'):
+            return self.upload_file()
+
+    def clear_session(self):
+        print("SESSION CLEARED")
+        session.clear()
+        clear_directory(os.path.join(os.getcwd(), Config.UPLOAD_FOLDER))
+        return '', 200
+
     def capture_text(self):
         try:
             data = request.json
             page_number = data.get("page_number", 0)
-            text = extract_text_from_page(get_session_data("pdf_path"), page_number)#TODO: update this
-
+            text = extract_text_from_page(get_session_data("pdf_path"), page_number)
             set_session_data("source_page", page_number)
             set_session_data("source_text", text)
             update_session_messages()
-
             return jsonify({"message": "{}".format(str(text))})
-        
         except Exception as e:
             print(f"Capture Text Error: {e}")
             return jsonify({"error": str(e)}), 500
-        
-    def clear_session(self):
-        print("SESSION CLEARED")
-        session.clear()
-        return '', 200
+
+    def upload_file(self):
+        file = request.files['file']
+        if file and file.filename.endswith('.pdf'):
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(Config.UPLOAD_FOLDER, filename)
+            set_session_data("pdf_path", file_path)
+            file.save(file_path)
+            return url_for('uploaded_file', filename=filename)
+
+        return "Invalid file", 400
+
+    @classmethod
+    def uploaded_file(cls, filename):
+        return send_from_directory(Config.UPLOAD_FOLDER, filename)
+
+    def get_uploaded_file(self, filename):
+        return self.uploaded_file(filename)
+
+    def dispatch_request(self, *args, **kwargs):
+        if request.method == 'GET' and request.path.startswith('/uploads/'):
+            return self.get_uploaded_file(*args, **kwargs)
+        return super().dispatch_request(*args, **kwargs)
 
 def initialize_routes(app):
+    memory_view = MemoryView.as_view('memory_view')
     app.add_url_rule('/', view_func=ChatView.as_view('index'))
-    app.add_url_rule('/capture_text', view_func = MemoryView.as_view("capture_text"))
+    app.add_url_rule('/capture_text', methods=['POST'], view_func=memory_view)
+    app.add_url_rule('/clear_session', methods=['POST'], view_func=memory_view)
+    app.add_url_rule('/upload_file', methods=['POST'], view_func=memory_view)
+    app.add_url_rule('/uploads/<filename>', methods=['GET'], view_func=memory_view)
+

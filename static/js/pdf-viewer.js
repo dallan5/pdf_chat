@@ -9,7 +9,6 @@ function debounce(func, wait) {
 
 // Define the event handler function
 const handlePageNumberUpdated = (pageNumber) => {
-    console.log("tests");
     console.log(`Switched to page: ${pageNumber}`);
     fetch('/capture_text', {
         method: 'POST',
@@ -29,17 +28,57 @@ const handlePageNumberUpdated = (pageNumber) => {
     });
 };
 
-WebViewer({
-    path: window.PDFJSExpressLibPath,
-    initialDoc: window.PDFInitialDocPath,
-    disabledElements: ["header", "annotation"],
-}, document.getElementById('pdf-wrapper'))
-    .then(instance => {
-        instance.UI.setTheme('dark');
-        instance.UI.disableFeatures([instance.UI.Feature.Print, instance.UI.Feature.Annotations]);
+// Function to initialize the WebViewer with a given file
+let viewerInstance = null;
 
-        const { documentViewer } = instance.Core;
+const initializeViewer = (file) => {
+    if (viewerInstance) {
+        viewerInstance.loadDocument(file);
+    } else {
+        WebViewer({
+            path: window.PDFJSExpressLibPath,
+            initialDoc: file,
+            disabledElements: ["header", "annotation"],
+        }, document.getElementById('pdf-wrapper'))
+            .then(instance => {
+                viewerInstance = instance;
+                instance.UI.setTheme('dark');
+                instance.UI.disableFeatures([instance.UI.Feature.Print, instance.UI.Feature.Annotations]);
 
-        // Use debounce to wrap the event handler function
-        documentViewer.addEventListener('pageNumberUpdated', debounce(handlePageNumberUpdated, 300));
-    });
+                const { documentViewer } = instance.Core;
+                documentViewer.addEventListener('pageNumberUpdated', debounce(handlePageNumberUpdated, 300));
+            });
+    }
+};
+
+
+// Initially, initialize the viewer with the default file
+initializeViewer(window.PDFInitialDocPath);
+
+// Set up the upload button click event listener
+document.getElementById('upload-button').addEventListener('click', () => {
+    document.getElementById('file-input').click();
+});
+
+// Set up the file input change event listener
+document.getElementById('file-input').addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    console.log("HASDAJSHDAS")
+    if (file) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        fetch('/upload_file', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(url => {
+            initializeViewer(url);
+            //document.getElementById('upload-button').style.display = 'none';  // Optionally hide the upload button
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+});

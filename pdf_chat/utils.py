@@ -1,3 +1,4 @@
+import os
 from pdf_chat.config import Config
 import markdown
 import PyPDF2
@@ -52,3 +53,10 @@ def clear_messages(messages):
 
     #Always remove the index 2, since 0 and 1 are assistant instructions followed by text. Keep the rest
     return [item for i, item in enumerate(messages) if i != 2]
+
+def clear_directory(directory_path):
+    for filename in os.listdir(directory_path):  # List all files and directories in the specified directory
+        file_path = os.path.join(directory_path, filename)  # Join the directory path and filename to get the full path
+        if os.path.isfile(file_path):  # Check if the path is a file (not a directory)
+            print("DELETE:", file_path)
+            os.unlink(file_path)

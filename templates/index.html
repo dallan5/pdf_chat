@@ -13,7 +13,10 @@
 
     <div class="main-container">
         <!-- PDF Container on the Left -->
-        <div id="pdf-wrapper" style="flex: 1; padding: 10px; height: 100vh;"></div>
+        <div id="pdf-wrapper" style="flex: 1; padding: 10px; height: 100vh;">
+            <button id="upload-button">Upload PDF</button>
+            <input type="file" id="file-input" accept=".pdf" style="display: none;" />
+        </div>
 
         <!-- Chat Container on the Right -->
         <div class="chat-container">
@@ -44,6 +47,7 @@
     <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
     <script src="{{ url_for('static', filename='libs/PDFJSExpress/lib/webviewer.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/pdf-viewer.js') }}"></script>
+    <!-- <script src="{{ url_for('static', filename='js/upload.js') }}"></script>-->
 </body>
 
 </html>
