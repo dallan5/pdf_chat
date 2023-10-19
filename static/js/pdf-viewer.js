@@ -71,6 +71,9 @@ document.getElementById('file-input').addEventListener('change', (event) => {
             body: formData
         })
         .then(response => {
+            if (response.status === 413) {
+                throw new Error('File is too large.');
+            }
             if (!response.ok) {
                 throw new Error('Network response was not ok ' + response.statusText);
             }
