@@ -134,9 +134,10 @@ class MemoryView(views.MethodView):
             file_path = os.path.join(Config.UPLOAD_FOLDER, filename)
             set_session_data("pdf_path", file_path)
             file.save(file_path)
-            return url_for('uploaded_file', filename=filename)
+            file_url = url_for('uploaded_file', filename=filename, _external=True)
+            return jsonify({"status": "success", "url": file_url})
 
-        return "Invalid file", 400
+        return jsonify({"status": "error", "message": "Invalid file"}), 400
 
     @classmethod
     def uploaded_file(cls, filename):

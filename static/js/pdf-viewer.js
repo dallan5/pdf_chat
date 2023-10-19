@@ -51,7 +51,6 @@ const initializeViewer = (file) => {
     }
 };
 
-
 // Initially, initialize the viewer with the default file
 initializeViewer(window.PDFInitialDocPath);
 
@@ -63,7 +62,6 @@ document.getElementById('upload-button').addEventListener('click', () => {
 // Set up the file input change event listener
 document.getElementById('file-input').addEventListener('change', (event) => {
     const file = event.target.files[0];
-    console.log("HASDAJSHDAS")
     if (file) {
         const formData = new FormData();
         formData.append('file', file);
@@ -72,10 +70,21 @@ document.getElementById('file-input').addEventListener('change', (event) => {
             method: 'POST',
             body: formData
         })
-        .then(response => response.text())
-        .then(url => {
-            initializeViewer(url);
-            //document.getElementById('upload-button').style.display = 'none';  // Optionally hide the upload button
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.status === 'success') {
+                // Optional delay before initializing the viewer
+                setTimeout(() => {
+                    initializeViewer(data.url);
+                }, 1000);
+            } else {
+                console.error('Error:', data.message);
+            }
         })
         .catch(error => {
             console.error('Error:', error);
