@@ -60,3 +60,8 @@ def clear_directory(directory_path):
         if os.path.isfile(file_path):  # Check if the path is a file (not a directory)
             print("DELETE:", file_path)
             os.unlink(file_path)
+
+
+def create_uploads_folder(uploads_dir):
+    if not os.path.exists(uploads_dir):
+        os.makedirs(uploads_dir)

@@ -10,7 +10,7 @@ from flask_session import Session
 
 from pdf_chat.config import Config
 from pdf_chat.routes import initialize_routes
-from pdf_chat.utils import clear_directory
+from pdf_chat.utils import clear_directory, create_uploads_folder
 
 
 
@@ -41,6 +41,7 @@ def handle_before_request():
     if not first_request_done:
         redis_client.flushdb()
         session.clear()
+        create_uploads_folder(Config.UPLOAD_FOLDER)
         clear_directory(os.path.join(os.getcwd(), Config.UPLOAD_FOLDER))
         first_request_done = True
 
