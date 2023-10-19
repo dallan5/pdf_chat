@@ -48,3 +48,6 @@ This example shows you how do deploy the pdf_chat to your VPS server.
    ```
 
 You should now be able to access the app at [http://localhost:5000](http://localhost:5000)!
+
+To get the server running, use this command:
+gunicorn --config gunicorn_config.py app:app --reload --log-level=debug --error-logfile=- --access-logfile=- --capture-output
