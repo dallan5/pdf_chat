@@ -53,6 +53,12 @@
 
     <!-- Start of JavaScript -->
     <script>
+
+
+        window.onbeforeunload = function() {
+            navigator.sendBeacon('/clear_session');
+        };
+
         let latestSelectedText = "";
 
         document.querySelector("form").addEventListener("submit", function (event) {
