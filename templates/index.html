@@ -6,22 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat with Assistant</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}" />
-    <style>
-        .main-container {
-            display: flex;
-        }
-
-        .pdf-container,
-        .chat-container {
-            flex: 1;
-            padding: 10px;
-        }
-
-        .pdf-object {
-            width: 100%;
-            height: 400px;
-        }
-    </style>
 </head>
 
 <body>
@@ -51,108 +35,15 @@
         </div>
     </div>
 
-    <!-- Start of JavaScript -->
     <script>
-
-
-        window.onbeforeunload = function() {
-            navigator.sendBeacon('/clear_session');
-        };
-
-        let latestSelectedText = "";
-
-        document.querySelector("form").addEventListener("submit", function (event) {
-            event.preventDefault();
-
-            const formData = new FormData(event.target);
-            const formObject = {};
-            formData.forEach((value, key) => {
-                formObject[key] = value;
-            });
-
-            const chatWindow = document.getElementById("chat-window");
-            const userMessage = document.createElement("div");
-            userMessage.className = "user";
-            userMessage.textContent = formObject.query;
-            chatWindow.appendChild(userMessage);
-
-            // Clear the input field
-            event.target.query.value = '';  // This line clears the input field
-
-            fetch("/", {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formObject)
-            })
-                .then(response => response.json())
-                .then(data => {
-                    const aiMessage = document.createElement("div");
-                    aiMessage.className = data.role || "assistant";
-                    aiMessage.innerHTML = data.message;
-                    chatWindow.appendChild(aiMessage);
-                    chatWindow.scrollTop = chatWindow.scrollHeight;
-                })
-                .catch(error => {
-                    console.error("Error:", error);
-                });
-        });
-
+        window.PDFJSExpressLibPath = "{{ url_for('static', filename='libs/PDFJSExpress/lib') }}";
+        window.PDFInitialDocPath = "{{ url_for('static', filename='pdf/book.pdf') }}";
     </script>
 
+    <!-- separate JavaScript files -->
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
     <script src="{{ url_for('static', filename='libs/PDFJSExpress/lib/webviewer.min.js') }}"></script>
-
-    <script>
-
-        // Define the debounce function
-        function debounce(func, wait) {
-            let timeout;
-            return function(...args) {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(this, args), wait);
-            };
-        }
-
-        // Define the event handler function
-        const handlePageNumberUpdated = (pageNumber) => {
-            console.log("tests");
-            console.log(`Switched to page: ${pageNumber}`);
-            fetch('/capture_text', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    page_number: pageNumber,
-                }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
-        };
-
-        WebViewer({
-            path: "{{ url_for('static', filename='libs/PDFJSExpress/lib') }}",
-            initialDoc: "{{ url_for('static', filename='pdf/book.pdf') }}",
-            disabledElements: ["header", "annotation"],
-        }, document.getElementById('pdf-wrapper'))
-            .then(instance => {
-                instance.UI.setTheme('dark');
-                instance.UI.disableFeatures([instance.UI.Feature.Print, instance.UI.Feature.Annotations]);
-
-                const { documentViewer } = instance.Core;
-
-                // Use debounce to wrap the event handler function
-                documentViewer.addEventListener('pageNumberUpdated', debounce(handlePageNumberUpdated, 300));
-            });
-
-    </script>
-
+    <script src="{{ url_for('static', filename='js/pdf-viewer.js') }}"></script>
 </body>
 
 </html>
