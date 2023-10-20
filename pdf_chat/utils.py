@@ -39,7 +39,7 @@ def extract_text_from_page(pdf_path, page_number):
         if reader.is_encrypted:
             reader.decrypt('')
         
-        if page_number < len(reader.pages):
+        if page_number <= len(reader.pages):
             page = reader.pages[page_number-1]
             text = page.extract_text()
         else:
