@@ -111,7 +111,7 @@ class MemoryView(views.MethodView):
     def clear_session(self):
         print("SESSION CLEARED")
         session.clear()
-        clear_directory(os.path.join(os.getcwd(), Config.UPLOAD_FOLDER))
+        clear_directory(Config.UPLOAD_FOLDER)
         return '', 200
 
     def capture_text(self):
