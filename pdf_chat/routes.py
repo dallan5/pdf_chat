@@ -23,12 +23,13 @@ class ChatView(views.MethodView):
             setup_messages()
         if "source_page" not in session:
             set_session_data("source_page", 0)
-        if "source_text" not in session:
-            set_session_data("source_text", "")
         if "pdf_path" not in session:
             set_session_data("pdf_path", "static/pdf/book.pdf")
         if "system_messages" not in session:
             set_session_data("system_messages", [])
+        if "source_text" not in session:
+            initial_text = self.extract_first_page_text(get_session_data("pdf_path"))
+            set_session_data("source_text", initial_text)
 
         return render_template("index.html", messages=get_session_data("conversation_messages", []))
 
@@ -96,6 +97,10 @@ class ChatView(views.MethodView):
         # Return the response to the frontend
         # This is placed outside the loop to ensure it's executed once the loop exits
         return jsonify({"role": role, "message": content})
+    
+    @staticmethod
+    def extract_first_page_text(pdf_path):
+        return extract_text_from_page(pdf_path, 0)
 
 class MemoryView(views.MethodView):
 
