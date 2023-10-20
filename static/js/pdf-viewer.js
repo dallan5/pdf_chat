@@ -46,7 +46,7 @@ const initializeViewer = (file) => {
                 instance.UI.disableFeatures([instance.UI.Feature.Print, instance.UI.Feature.Annotations]);
 
                 const { documentViewer } = instance.Core;
-                log.console("TESTING THIS")
+                console.log("TESTING THIS")
                 documentViewer.addEventListener('pageNumberUpdated', debounce(handlePageNumberUpdated, 300));
             });
     }
