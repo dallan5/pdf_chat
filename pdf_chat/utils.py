@@ -43,7 +43,7 @@ def extract_text_from_page(pdf_path, page_number):
             page = reader.pages[page_number-1]
             text = page.extract_text()
         else:
-            raise Exception(f"Page {page_number} not found in the document.")
+            raise Exception(f"Page {page_number} not found in the document.PDF file: {pdf_path}")
     return text
 
 def clear_messages(messages):
