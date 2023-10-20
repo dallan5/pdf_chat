@@ -14,6 +14,8 @@ def register_message(role, content):
     set_session_data("conversation_messages", conversation_messages)
     update_session_messages()
 
+def extract_first_page_text(pdf_path):
+    return extract_text_from_page(pdf_path, 0)
 
 class ChatView(views.MethodView):
     
@@ -28,16 +30,14 @@ class ChatView(views.MethodView):
         if "system_messages" not in session:
             set_session_data("system_messages", [])
         if "source_text" not in session:
-            initial_text = self.extract_first_page_text(get_session_data("pdf_path"))
-            set_session_data("source_text", initial_text)
+            set_session_data("source_text", extract_first_page_text(get_session_data("pdf_path")))
+        update_session_messages()
 
         return render_template("index.html", messages=get_session_data("conversation_messages", []))
 
     def post(self):
         if request.is_json:
             return self._handle_ajax_request()
-        #elif 'query' in request.form:
-        #    return self._handle_form_request()
 
     def _handle_ajax_request(self):
         query = request.json['query']
@@ -98,9 +98,6 @@ class ChatView(views.MethodView):
         # This is placed outside the loop to ensure it's executed once the loop exits
         return jsonify({"role": role, "message": content})
     
-    @staticmethod
-    def extract_first_page_text(pdf_path):
-        return extract_text_from_page(pdf_path, 0)
 
 class MemoryView(views.MethodView):
 
@@ -139,6 +136,8 @@ class MemoryView(views.MethodView):
             file_path = os.path.join(Config.UPLOAD_FOLDER, filename)
             set_session_data("pdf_path", file_path)
             file.save(file_path)
+            set_session_data("source_text", extract_first_page_text(get_session_data("pdf_path")))
+            update_session_messages()
             file_url = url_for('uploaded_file', filename=filename, _external=True)
             return jsonify({"status": "success", "url": file_url})
 

@@ -16,19 +16,19 @@ def update_session_messages():
             facts contained within:\n{}"""
     
     messages = setup_messages()
+    print("GETTING SOURCE TEXT: " + get_session_data("source_text", ""))
     source_text = get_session_data("source_text", "")
     source_page = get_session_data("source_page", 0)
     conversation_messages = get_session_data("conversation_messages", [])
 
-    if source_text and source_page:
-        messages = add_message_to_list(
-            "user", 
-            message.format(
-                source_page, 
-                source_text,
-                ), 
-            messages
-            )
+    messages = add_message_to_list(
+        "user", 
+        message.format(
+            source_page, 
+            source_text,
+            ), 
+        messages
+        )
 
     messages += conversation_messages
     print('-------------------')
